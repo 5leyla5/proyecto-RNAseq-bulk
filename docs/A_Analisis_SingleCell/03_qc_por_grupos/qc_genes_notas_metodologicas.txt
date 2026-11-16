@@ -1,0 +1,6 @@
+A/03 - QC de genes: deteccion global en la matriz sin filtrar.
+Un gen esta detectado en una celula si cuenta con al menos 1 UMI.
+Los umbrales 1, 3 y 10 celulas son simulaciones, NO filtros aplicados.
+No se ha escogido un umbral definitivo ni se han excluido genes o celulas.
+El QC celular por tipo y donante esta en los otros resultados del paso 03.
+La seleccion de marcadores para la referencia corresponde al objetivo B, tras separar donantes.

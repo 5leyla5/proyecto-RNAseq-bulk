@@ -1,0 +1,20 @@
+# Datos originales y objetos pesados
+data/raw/
+data/processed/
+
+# Archivos temporales de R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Registros temporales
+logs/
+
+# Configuración personal
+.Renviron
+.env
+
+# Bibliotecas locales de renv
+renv/library/
+renv/staging/
+renv/sandbox/

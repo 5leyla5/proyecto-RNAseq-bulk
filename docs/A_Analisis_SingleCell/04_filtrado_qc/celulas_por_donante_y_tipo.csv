@@ -1,0 +1,235 @@
+"Patient","celltype_major","n_celulas_conservadas"
+"CID3586","B-cells",321
+"CID3838","B-cells",47
+"CID3921","B-cells",162
+"CID3941","B-cells",55
+"CID3946","B-cells",0
+"CID3948","B-cells",85
+"CID3963","B-cells",0
+"CID4040","B-cells",105
+"CID4066","B-cells",38
+"CID4067","B-cells",53
+"CID4290A","B-cells",117
+"CID4398","B-cells",36
+"CID44041","B-cells",176
+"CID4461","B-cells",0
+"CID4463","B-cells",0
+"CID4465","B-cells",33
+"CID4471","B-cells",99
+"CID4495","B-cells",773
+"CID44971","B-cells",369
+"CID44991","B-cells",88
+"CID4513","B-cells",43
+"CID4515","B-cells",494
+"CID45171","B-cells",56
+"CID4523","B-cells",0
+"CID4530N","B-cells",0
+"CID4535","B-cells",56
+"CID3586","CAFs",185
+"CID3838","CAFs",203
+"CID3921","CAFs",106
+"CID3941","CAFs",8
+"CID3946","CAFs",167
+"CID3948","CAFs",15
+"CID3963","CAFs",23
+"CID4040","CAFs",129
+"CID4066","CAFs",923
+"CID4067","CAFs",135
+"CID4290A","CAFs",280
+"CID4398","CAFs",178
+"CID44041","CAFs",681
+"CID4461","CAFs",41
+"CID4463","CAFs",25
+"CID4465","CAFs",379
+"CID4471","CAFs",1292
+"CID4495","CAFs",232
+"CID44971","CAFs",582
+"CID44991","CAFs",245
+"CID4513","CAFs",13
+"CID4515","CAFs",187
+"CID45171","CAFs",32
+"CID4523","CAFs",42
+"CID4530N","CAFs",368
+"CID4535","CAFs",102
+"CID3586","Cancer Epithelial",0
+"CID3838","Cancer Epithelial",0
+"CID3921","Cancer Epithelial",441
+"CID3941","Cancer Epithelial",196
+"CID3946","Cancer Epithelial",0
+"CID3948","Cancer Epithelial",261
+"CID3963","Cancer Epithelial",222
+"CID4040","Cancer Epithelial",0
+"CID4066","Cancer Epithelial",521
+"CID4067","Cancer Epithelial",2352
+"CID4290A","Cancer Epithelial",4053
+"CID4398","Cancer Epithelial",0
+"CID44041","Cancer Epithelial",0
+"CID4461","Cancer Epithelial",207
+"CID4463","Cancer Epithelial",659
+"CID4465","Cancer Epithelial",124
+"CID4471","Cancer Epithelial",212
+"CID4495","Cancer Epithelial",1184
+"CID44971","Cancer Epithelial",894
+"CID44991","Cancer Epithelial",4018
+"CID4513","Cancer Epithelial",1058
+"CID4515","Cancer Epithelial",2169
+"CID45171","Cancer Epithelial",813
+"CID4523","Cancer Epithelial",1167
+"CID4530N","Cancer Epithelial",1715
+"CID4535","Cancer Epithelial",2223
+"CID3586","Endothelial",157
+"CID3838","Endothelial",99
+"CID3921","Endothelial",210
+"CID3941","Endothelial",44
+"CID3946","Endothelial",110
+"CID3948","Endothelial",85
+"CID3963","Endothelial",102
+"CID4040","Endothelial",218
+"CID4066","Endothelial",535
+"CID4067","Endothelial",186
+"CID4290A","Endothelial",298
+"CID4398","Endothelial",101
+"CID44041","Endothelial",148
+"CID4461","Endothelial",182
+"CID4463","Endothelial",79
+"CID4465","Endothelial",294
+"CID4471","Endothelial",2778
+"CID4495","Endothelial",184
+"CID44971","Endothelial",217
+"CID44991","Endothelial",41
+"CID4513","Endothelial",162
+"CID4515","Endothelial",122
+"CID45171","Endothelial",15
+"CID4523","Endothelial",3
+"CID4530N","Endothelial",1016
+"CID4535","Endothelial",219
+"CID3586","Myeloid",200
+"CID3838","Myeloid",444
+"CID3921","Myeloid",385
+"CID3941","Myeloid",37
+"CID3946","Myeloid",157
+"CID3948","Myeloid",122
+"CID3963","Myeloid",479
+"CID4040","Myeloid",50
+"CID4066","Myeloid",221
+"CID4067","Myeloid",266
+"CID4290A","Myeloid",341
+"CID4398","Myeloid",225
+"CID44041","Myeloid",105
+"CID4461","Myeloid",53
+"CID4463","Myeloid",101
+"CID4465","Myeloid",181
+"CID4471","Myeloid",285
+"CID4495","Myeloid",897
+"CID44971","Myeloid",684
+"CID44991","Myeloid",206
+"CID4513","Myeloid",2795
+"CID4515","Myeloid",563
+"CID45171","Myeloid",172
+"CID4523","Myeloid",355
+"CID4530N","Myeloid",96
+"CID4535","Myeloid",255
+"CID3586","Normal Epithelial",698
+"CID3838","Normal Epithelial",0
+"CID3921","Normal Epithelial",0
+"CID3941","Normal Epithelial",0
+"CID3946","Normal Epithelial",0
+"CID3948","Normal Epithelial",0
+"CID3963","Normal Epithelial",1
+"CID4040","Normal Epithelial",0
+"CID4066","Normal Epithelial",270
+"CID4067","Normal Epithelial",0
+"CID4290A","Normal Epithelial",18
+"CID4398","Normal Epithelial",0
+"CID44041","Normal Epithelial",151
+"CID4461","Normal Epithelial",0
+"CID4463","Normal Epithelial",26
+"CID4465","Normal Epithelial",10
+"CID4471","Normal Epithelial",1966
+"CID4495","Normal Epithelial",0
+"CID44971","Normal Epithelial",735
+"CID44991","Normal Epithelial",24
+"CID4513","Normal Epithelial",0
+"CID4515","Normal Epithelial",36
+"CID45171","Normal Epithelial",0
+"CID4523","Normal Epithelial",0
+"CID4530N","Normal Epithelial",398
+"CID4535","Normal Epithelial",22
+"CID3586","Plasmablasts",0
+"CID3838","Plasmablasts",51
+"CID3921","Plasmablasts",175
+"CID3941","Plasmablasts",0
+"CID3946","Plasmablasts",0
+"CID3948","Plasmablasts",232
+"CID3963","Plasmablasts",0
+"CID4040","Plasmablasts",74
+"CID4066","Plasmablasts",0
+"CID4067","Plasmablasts",0
+"CID4290A","Plasmablasts",0
+"CID4398","Plasmablasts",91
+"CID44041","Plasmablasts",0
+"CID4461","Plasmablasts",32
+"CID4463","Plasmablasts",0
+"CID4465","Plasmablasts",110
+"CID4471","Plasmablasts",51
+"CID4495","Plasmablasts",1020
+"CID44971","Plasmablasts",48
+"CID44991","Plasmablasts",1453
+"CID4513","Plasmablasts",0
+"CID4515","Plasmablasts",36
+"CID45171","Plasmablasts",0
+"CID4523","Plasmablasts",0
+"CID4530N","Plasmablasts",55
+"CID4535","Plasmablasts",96
+"CID3586","PVL",21
+"CID3838","PVL",158
+"CID3921","PVL",72
+"CID3941","PVL",25
+"CID3946","PVL",248
+"CID3948","PVL",62
+"CID3963","PVL",28
+"CID4040","PVL",443
+"CID4066","PVL",630
+"CID4067","PVL",83
+"CID4290A","PVL",140
+"CID4398","PVL",87
+"CID44041","PVL",128
+"CID4461","PVL",48
+"CID4463","PVL",31
+"CID4465","PVL",317
+"CID4471","PVL",1285
+"CID4495","PVL",191
+"CID44971","PVL",91
+"CID44991","PVL",46
+"CID4513","PVL",82
+"CID4515","PVL",123
+"CID45171","PVL",13
+"CID4523","PVL",10
+"CID4530N","PVL",469
+"CID4535","PVL",592
+"CID3586","T-cells",4596
+"CID3838","T-cells",1351
+"CID3921","T-cells",1473
+"CID3941","T-cells",266
+"CID3946","T-cells",92
+"CID3948","T-cells",1465
+"CID3963","T-cells",2672
+"CID4040","T-cells",1512
+"CID4066","T-cells",2171
+"CID4067","T-cells",689
+"CID4290A","T-cells",542
+"CID4398","T-cells",3733
+"CID44041","T-cells",742
+"CID4461","T-cells",68
+"CID4463","T-cells",217
+"CID4465","T-cells",116
+"CID4471","T-cells",641
+"CID4495","T-cells",3504
+"CID44971","T-cells",4366
+"CID44991","T-cells",902
+"CID4513","T-cells",1466
+"CID4515","T-cells",419
+"CID45171","T-cells",1346
+"CID4523","T-cells",177
+"CID4530N","T-cells",292
+"CID4535","T-cells",396
