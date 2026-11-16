@@ -1,0 +1,9 @@
+"indicador","n"
+"Filas de clinical.tsv",5529
+"Pacientes clinicos unicos",1095
+"Pacientes en cohorte GDC",1095
+"Pacientes con diagnostico primario",1093
+"Pacientes con estadio patologico utilizable",1069
+"Pacientes sin estadio patologico utilizable",26
+"Pacientes con estadios primarios contradictorios",0
+"Pacientes con edad disponible",1094
