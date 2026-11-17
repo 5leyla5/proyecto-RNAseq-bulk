@@ -137,9 +137,28 @@ knitr::kable(res_tabla, format = "html", row.names = FALSE, escape = TRUE,
 
 ### Flujo de análisis (diseño; pasos B–D aún pendientes)
 
-```{r figura-flujo, fig.align='center', out.height='10.5cm', fig.cap='Figura 1. Diseño del flujo de referencia, validación y aplicación exploratoria. La separación de donantes y deconvolución son pasos planificados, no resultados ejecutados.'}
-knitr::include_graphics(archivos[["figura"]])
+```{r figura-flujo, results='asis'}
+if (!requireNamespace("base64enc", quietly = TRUE)) {
+  stop("Falta el paquete base64enc")
+}
+
+uri <- base64enc::dataURI(
+  file = archivos[["figura"]],
+  mime = "image/png"
+)
+
+cat(
+  '<div class="figure" style="text-align:center">',
+  sprintf(
+    '<img src="%s" alt="Flujo metodológico" style="max-height:10.5cm;max-width:100%%;height:auto;">',
+    uri
+  ),
+  '<p class="caption">Figura 1. Diseño del flujo de referencia, validación y aplicación exploratoria. Los pasos B–D aún están planificados.</p>',
+  '</div>',
+  sep = "\n"
+)
 ```
+
 
 :::
 
