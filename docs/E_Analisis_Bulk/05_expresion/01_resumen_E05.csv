@@ -1,0 +1,12 @@
+"indicador","valor"
+"Archivos STAR Counts leidos",50
+"Genes anotados en matrices bulk",60660
+"Genes protein_coding anotados",19962
+"Genes con conteos positivos en alguna muestra",52937
+"Genes con conteos positivos en todas las muestras",17680
+"Modelos genicos distintos",1
+"Simbolos bulk unicos no ambiguos",59317
+"Genes referencia GSE176078 (filas features.tsv)",29733
+"Simbolos referencia unicos no ambiguos",29733
+"Simbolos compartidos no ambiguos",20288
+"IDs Ensembl compartidos sin version",
