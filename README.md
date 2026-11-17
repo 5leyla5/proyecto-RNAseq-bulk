@@ -11,7 +11,7 @@
 
 ## 1. Pregunta, hipótesis y objetivos
 
-**Pregunta de investigación.** ¿Con qué error se pueden estimar proporciones celulares conocidas de mezclas pseudobulk a partir de una referencia scRNA-seq de donantes independientes y qué tan factible es aplicar posteriormente el procedimiento a muestras bulk de TCGA-BRCA?
+**Pregunta de investigación.** ¿Con qué precisión puede una referencia celular construida a partir de scRNA-seq estimar proporciones conocidas de tipos celulares en mezclas pseudobulk de donantes independientes, y es técnicamente factible aplicar ese procedimiento a tumores primarios de TCGA-BRCA?
 
 **Hipótesis que se evaluará:** un método de deconvolución construido a partir de donantes de entrenamiento obtendrá menor error absoluto medio (MAE) en pseudobulk de donantes reservados que un comparador basal que prediga la composición promedio del entrenamiento. **La hipótesis todavía no ha sido contrastada.**
 
@@ -21,7 +21,7 @@
 
 1. Caracterizar y comprobar la factibilidad técnica de GSE176078 (scRNA-seq) y TCGA-BRCA (RNA-seq bulk).
 2. Construir una referencia celular con donantes de entrenamiento, sin utilizar información de los donantes reservados para seleccionar genes o ajustar el modelo.
-3. Generar pseudobulk con proporciones conocidas a partir de donantes reservados y comparar NNLS y MuSiC, si sus supuestos y dependencias resultan adecuados.
+3. Generar pseudobulk con proporciones conocidas a partir de donantes reservados y comparar NNLS / MuSiC, si sus supuestos y dependencias resultan adecuados.
 4. Evaluar MAE, RMSE y errores por categoría celular frente al comparador basal.
 5. Tras la validación interna, aplicar el procedimiento de forma exploratoria a TCGA-BRCA y discutir sus limitaciones.
 
