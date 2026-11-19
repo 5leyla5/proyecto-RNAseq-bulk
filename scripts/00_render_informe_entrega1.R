@@ -1,14 +1,15 @@
 # Entrega 1 - renderizado reproducible HTML (sin procesar PNG como texto).
 # Ejecutar desde la raiz del proyecto en la consola R de Positron:
 # source("scripts/00_render_informe_entrega1.R", encoding = "UTF-8")
-# El HTML usa assets/flujo_metodologico.png como archivo vinculado.
-# Mantener el HTML y su carpeta assets/ juntos en GitHub / al compartir.
+# El HTML final es AUTONOMO: incrusta la imagen PNG en Base64 DESPUES de Pandoc.
+# Puede descargarse por separado de GitHub y sigue mostrando la imagen.
+# La fuente PNG original se mantiene en assets/ para reconstruir el informe.
 
 if (!file.exists("README.md") || !dir.exists("docs/E_Analisis_Bulk")) {
   stop("Abre la raiz del repositorio Proyecto RNA-seq bulk en Positron.")
 }
 
-paquetes <- c("rmarkdown", "knitr")
+paquetes <- c("rmarkdown", "knitr", "base64enc")
 faltantes <- paquetes[!vapply(paquetes, requireNamespace, logical(1), quietly = TRUE)]
 if (length(faltantes)) {
   stop("Paquetes R faltantes: ", paste(faltantes, collapse = ", "))
@@ -49,9 +50,9 @@ if (!grepl(marca, texto, fixed = TRUE)) {
   stop("No esta el marcador de imagen en el Rmd. Debe contener INSERTAR_FIGURA_FLUJO_POST_PANDOC.")
 }
 
-# No crear dataURI ni incrustar la imagen como una cadena Base64 gigante.
-# Esta ruta se resuelve desde el HTML en docs/Entrega_1/.
-cat("[2/2] Enlazando assets/flujo_metodologico.png e insertando estilos...\n")
+# Construir primero HTML con ruta relativa; no pasar PNG/Base64 a Pandoc.
+# La imagen se incrustara SOLO al final, cuando ya esten validados los estilos.
+cat("[2/2] Insertando estilos y preparando la imagen PNG...\n")
 etiqueta <- paste0(
   '<img src="assets/flujo_metodologico.png" ',
   'alt="Flujo metodologico: GSE176078, referencia, pseudobulk, NNLS y MuSiC, validacion y TCGA-BRCA" ',
@@ -128,7 +129,20 @@ if (!grepl('<style type="text/css">', html, fixed = TRUE) ||
     !grepl('href="estilo_informe.css"', html, fixed = TRUE)) {
   stop("Fallo la inclusion de los estilos del informe.")
 }
-writeLines(enc2utf8(html), con = salida, useBytes = TRUE)
+# Pandoc ya termino: sustituir el atributo src por un data URI ASCII valido.
+# NO ejecutar grep()/readLines() sobre el HTML grande despues de esta insercion.
+patron_imagen <- 'src="assets/flujo_metodologico.png"'
+if (!grepl(patron_imagen, html, fixed = TRUE)) {
+  stop("No se encontro la referencia a la figura en el HTML generado.")
+}
+uri_imagen <- base64enc::dataURI(file = imagen, mime = "image/png")
+if (!is.character(uri_imagen) || length(uri_imagen) != 1L ||
+    !startsWith(uri_imagen, "data:image/png;base64,")) {
+  stop("No se pudo convertir correctamente el PNG a Base64.")
+}
+html <- sub(patron_imagen, paste0('src="', uri_imagen, '"'), html, fixed = TRUE)
+# Usar escritura binaria para evitar conversiones automaticas de codificacion.
+writeBin(charToRaw(enc2utf8(html)), con = salida)
 if (!file.exists(salida) || file.info(salida)$size < 1000) {
   stop("No se genero correctamente el HTML.")
 }
@@ -141,6 +155,6 @@ if (n_paginas != 3L) {
 }
 unlink(tmp, recursive = TRUE, force = TRUE)
 cat("\nInforme HTML generado: ", salida,
-    "\nFigura enlazada correctamente: docs/Entrega_1/assets/flujo_metodologico.png",
-    "\nMantener HTML, estilo_informe.css y assets/ juntos. No se genero Word.",
+    "\nFigura incrustada: el HTML puede abrirse por separado de GitHub.",
+    "\nConservar el PNG fuente en assets/ para regenerar. No se genero Word.",
     "\nComprobar visualmente 3 paginas A4 antes del commit.\n", sep = "")
