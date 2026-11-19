@@ -20,7 +20,7 @@ p.caption { text-align: center; font-size: 8pt; color: #5d6c80; margin-top: 1px;
 a { color: #31599a; }
 @media print {
   @page { size: A4 portrait; margin: 11mm 13mm 10mm; }
-  html, body { margin: 0; padding: 0; background: #fff; font-size: 9.5pt; line-height: 1.26; }
+  html, body { margin: 0; padding: 0; background: #fff; font-size: 9.8pt; line-height: 1.27; }
   .main-container { max-width: none !important; margin: 0 !important; padding: 0 !important; }
   #header { border: none; border-top: 3px solid #344b7c; border-radius: 0; padding: 0 0 5px !important; margin-bottom: 4px; }
   #header h1 { font-size: 16pt; margin: 0 0 3px; }
@@ -32,7 +32,7 @@ a { color: #31599a; }
   .report-page p { margin: 4px 0 7px; }
   .data-table { font-size: 7.8pt; margin: 5px 0 6px; }
   .data-table td, .data-table th { padding: 3px 5px; }
-  .figure img { max-height: 345px; }
+  .figure img { max-height: 335px; }
   .refs { font-size: 7.7pt; }
   a { color: #1b2635; }
   h2,h3,.figure,.refs,table { break-inside: avoid; page-break-inside: avoid; }

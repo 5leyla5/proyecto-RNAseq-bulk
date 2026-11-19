@@ -1,15 +1,9 @@
 ---
 title: "Diseño y factibilidad de un flujo reproducible para deconvolución celular de RNA-seq bulk en cáncer de mama"
-author: "Proyecto RNA-seq bulk · Bioinformática II"
+author: "Leyla Victoria Saavedra Quinteros · Estudiante del Magíster en Informática Médica, Universidad de Chile"
 date: "Entrega parcial 1 · 19 de noviembre de 2026"
 lang: es
-output:
-  html_document:
-    self_contained: true
-    toc: false
-    number_sections: false
-    df_print: default
-    css: estilo_informe.css
+output: html_fragment
 ---
 
 ```{r configuracion, include=FALSE}
@@ -23,6 +17,7 @@ if (!file.exists("README.md") || !dir.exists("docs/E_Analisis_Bulk")) {
 archivos <- c(
   a01 = "docs/A_Analisis_SingleCell/01_objeto_seurat/resumen.csv",
   a04 = "docs/A_Analisis_SingleCell/04_filtrado_qc/resumen_conservacion.csv",
+  cobertura = "docs/A_Analisis_SingleCell/04_filtrado_qc/celulas_por_donante_y_tipo.csv",
   e01 = "docs/E_Analisis_Bulk/01_cohorte/01_resumen_TCGA_BRCA.csv",
   e02 = "docs/E_Analisis_Bulk/02_clinica/01_resumen_clinico.csv",
   e03 = "docs/E_Analisis_Bulk/03_piloto/01_resumen_piloto.csv",
@@ -39,6 +34,7 @@ faltantes <- archivos[!file.exists(archivos)]
 if (length(faltantes)) stop("Faltan archivos de respaldo: ", paste(faltantes, collapse = "; "))
 leer <- function(p) read.csv(p, check.names = FALSE, stringsAsFactors = FALSE)
 A <- leer(archivos[["a01"]]); A4 <- leer(archivos[["a04"]])
+COB <- leer(archivos[["cobertura"]])
 E1 <- leer(archivos[["e01"]]); E2 <- leer(archivos[["e02"]])
 E3 <- leer(archivos[["e03"]]); ES <- leer(archivos[["estadios"]])
 E4 <- leer(archivos[["e04"]]); EI <- leer(archivos[["integridad"]])
@@ -71,6 +67,24 @@ n_genes_bulk <- v(E5, "Genes anotados en matrices bulk")
 n_genes_positivos <- v(E5, "Genes con conteos positivos en alguna muestra")
 n_comunes <- v(E5, "Simbolos compartidos no ambiguos")
 n_md5 <- sum(EI$integro %in% TRUE)
+# Cobertura por DONANTE, a partir del inventario publicado en el objetivo A.
+stopifnot(all(c("Patient", "celltype_major", "n_celulas_conservadas") %in% names(COB)))
+stopifnot(length(unique(COB$Patient)) == n_donantes)
+cobertura_tipo <- aggregate(n_celulas_conservadas ~ celltype_major, COB,
+                            FUN = function(x) sum(x > 0, na.rm = TRUE))
+n_donantes_tipo <- function(tipo) {
+  p <- which(cobertura_tipo$celltype_major == tipo)
+  if (length(p) != 1L) stop("Tipo celular no documentado: ", tipo)
+  cobertura_tipo$n_celulas_conservadas[p]
+}
+# Extremos QC como ALERTAS descriptivas, no exclusión automática.
+qc_resumen <- function(metrica, campo) {
+  p <- which(Q$metrica == metrica)
+  if (length(p) != 1L) stop("Métrica QC no encontrada: ", metrica)
+  x <- as.numeric(Q[[campo]][p])
+  if (length(x) != 1L || is.na(x)) stop("Valor QC faltante: ", metrica, "/", campo)
+  x
+}
 bytes_manifest <- sum(as.numeric(M$size))
 
 # Asegurar que el informe no muestra cifras inconsistentes con el corte original.
@@ -86,6 +100,11 @@ stopifnot(v(E4, "Bytes esperados") == bytes_manifest, bytes_manifest == 21205012
 stopifnot(n_genes_bulk == 60660, n_genes_positivos <= n_genes_bulk,
           n_comunes <= n_genes_sc)
 stopifnot(setequal(ES$estadio, c("I", "II", "III", "IV")), sum(ES$pacientes) == n_piloto)
+stopifnot(n_donantes_tipo("Normal Epithelial") == 13L,
+          n_donantes_tipo("Plasmablasts") == 14L,
+          n_donantes_tipo("Cancer Epithelial") == 20L)
+stopifnot(qc_resumen("porcentaje_conteos_protein_coding", "minimo") <
+          qc_resumen("porcentaje_conteos_protein_coding", "mediana"))
 
 n_iv <- ES$pacientes[match("IV", ES$estadio)]
 res_tabla <- data.frame(
@@ -102,23 +121,27 @@ res_tabla <- data.frame(
 
 ## 1. Planteamiento científico
 
-**Problema.** El RNA-seq bulk mide expresión génica agregada de tejidos que contienen distintas poblaciones celulares; no identifica directamente la proporción de cada tipo celular. El scRNA-seq ofrece perfiles por célula y anotaciones que pueden servir como referencia. Su extrapolación entre donantes y plataformas debe evaluarse antes de interpretar tumores reales [1–3].
+**Problema y justificación.** El RNA-seq bulk mide la expresión conjunta de células tumorales, inmunitarias y estromales; por sí solo no revela cuántas células de cada población contribuyeron a la señal. En contraste, el scRNA-seq caracteriza perfiles individuales y permite obtener firmas de tipos celulares anotados. La deconvolución intenta recuperar su composición a partir de la expresión agregada, pero el resultado depende de la calidad, cobertura y representatividad de la referencia [1–3].
 
-**Pregunta de investigación.** ¿Con qué precisión puede una referencia celular construida a partir de scRNA-seq estimar proporciones conocidas de tipos celulares en mezclas pseudobulk de donantes independientes, y es técnicamente factible aplicar ese procedimiento a tumores primarios de TCGA-BRCA?
+**Pertinencia clínica.** En cáncer de mama, la heterogeneidad del microambiente tumoral puede dificultar la interpretación de los perfiles bulk. Antes de relacionar proporciones estimadas con estadio patológico, corresponde comprobar que el método recupera composiciones conocidas en un escenario de prueba independiente; una asociación clínica sin esa evaluación podría reflejar sesgos de plataforma o de la referencia.
+
+**Pregunta de investigación.** ¿Con qué precisión puede una referencia celular construida a partir de scRNA-seq estimar proporciones conocidas de tipos celulares en mezclas *pseudobulk* de donantes independientes, y es técnicamente factible aplicar ese procedimiento a tumores primarios de TCGA-BRCA?
 
 **Hipótesis (por contrastar).** La deconvolución basada en perfiles de donantes de entrenamiento tendrá menor error absoluto medio (MAE) en mezclas de donantes reservados que un comparador basal que prediga la composición promedio del entrenamiento. **No existen aún resultados de esta contrastación.**
 
-**Objetivo general.** Diseñar y evaluar un flujo reproducible para estimar composición celular de muestras RNA-seq bulk de cáncer de mama usando scRNA-seq como referencia.
+**Objetivo general.** Desarrollar y evaluar un flujo reproducible para estimar composición celular de muestras RNA-seq bulk de cáncer de mama utilizando scRNA-seq como referencia.
 
 **Objetivos específicos.** (i) Caracterizar las fuentes y las cohortes; (ii) establecer una referencia con independencia por donante; (iii) generar pseudobulk con proporciones conocidas; (iv) evaluar NNLS y MuSiC con MAE, RMSE y sesgos por tipo celular frente al comparador basal; y (v) aplicar exploratoriamente el procedimiento a TCGA-BRCA tras su validación interna.
 
 ### Fuentes de información y alcance ejecutado
 
-**GSE176078 / Broad SCP1039** [1]: atlas de scRNA-seq de cáncer de mama, con `r fmt(n_donantes)` donantes, `r fmt(n_celulas)` células, `r fmt(n_genes_sc)` genes y nueve categorías celulares principales. Los conteos UMI y los metadatos originales están disponibles y el QC descriptivo inicial (objetivo A) está documentado. Se decidió **no aplicar filtros adicionales** en esta etapa; no equivale a asegurar ausencia de dobletes o efectos de lote.
+**GSE176078 / Broad SCP1039** [1]: atlas de scRNA-seq de cáncer de mama, con `r fmt(n_donantes)` donantes, `r fmt(n_celulas)` células, `r fmt(n_genes_sc)` genes y nueve categorías celulares principales. Los conteos UMI y los metadatos originales están disponibles y el QC descriptivo inicial (objetivo A) está documentado. Se decidió **no aplicar filtros adicionales** tras revisar criterios del atlas y distribuciones por donante/tipo celular; ello no garantiza ausencia de dobletes, contaminación ambiental ni efectos de lote. Los donantes cubren subtipos ER+ (11), HER2+ (5) y TNBC (10).
 
 **TCGA-BRCA / NCI GDC**: `r fmt(n_catalogo)` archivos de expresión STAR Counts de tumor primario correspondientes a `r fmt(n_bulk_pac)` pacientes distintos. Se cuenta con metadatos, datos clínicos y una selección de `r fmt(n_piloto)` archivos bulk descargados e íntegros (objetivo E/01–E/05). **No se ha realizado deconvolución.**
 
-**Producto de la Entrega 1.** Cohorte y unidades definidas, evidencia de acceso y lectura, tabla preliminar, entorno computacional y ruta metodológica con riesgos explícitos; no se presentan asociaciones clínicas ni proporciones celulares inferidas.
+**Unidad y alcance.** En scRNA-seq la observación es la célula, pero la unidad independiente para dividir entrenamiento/prueba es el donante. En TCGA-BRCA la unidad clínica es el paciente, asociado a un archivo tumoral primario seleccionado. Esta entrega demuestra **diseño y factibilidad**, no predicción validada, resultados de deconvolución ni asociaciones por estadio.
+
+**Productos verificables.** Se dispone de controles de integridad MD5, resúmenes de cohorte, lectura de expresión y código versionado. La evaluación de modelos y la interpretación biológica serán etapas posteriores, separadas de esta verificación inicial.
 
 :::
 
@@ -135,30 +158,14 @@ knitr::kable(res_tabla, format = "html", row.names = FALSE, escape = TRUE,
 
 **Definición de cohorte.** En TCGA-BRCA, la unidad clínica es el **paciente** (`Case ID`) y se elige una sola muestra/archivo de expresión por paciente para evitar pseudorreplicación. Se prioriza la preservación OCT, luego Unknown y finalmente FFPE, resolviendo empates mediante los identificadores de muestra y archivo. El piloto excluye FFPE (`r fmt(n_no_ffpe)` pacientes candidatos), selecciona `r fmt(n_piloto)` con `set.seed(20261116)` y conserva esa selección al vincular estadio clínico. De los `r fmt(n_bulk_pac)` pacientes, `r fmt(n_estadio)` tienen estadio patológico AJCC utilizable; el piloto tiene **`r fmt(n_iv)` paciente** en estadio IV, por lo que no fue diseñado para inferencia comparativa por estadio.
 
+**Representación de poblaciones de referencia.** Aunque el atlas incluye nueve categorías, su cobertura no es uniforme: *Normal Epithelial* está anotada en **`r n_donantes_tipo("Normal Epithelial")`/`r fmt(n_donantes)` donantes**, *Plasmablasts* en **`r n_donantes_tipo("Plasmablasts")`/`r fmt(n_donantes)`** y *Cancer Epithelial* en **`r n_donantes_tipo("Cancer Epithelial")`/`r fmt(n_donantes)`**. Estos ceros describen ausencia de células capturadas/anotadas, **no ausencia biológica demostrada**. La partición de donantes deberá contemplar la cobertura de las categorías y documentar las que no resulten evaluables.
+
 ### Flujo de análisis (diseño; pasos B–D aún pendientes)
 
-```{r figura-flujo, results='asis'}
-if (!requireNamespace("base64enc", quietly = TRUE)) {
-  stop("Falta el paquete base64enc")
-}
-
-uri <- base64enc::dataURI(
-  file = archivos[["figura"]],
-  mime = "image/png"
-)
-
-cat(
-  '<div class="figure" style="text-align:center">',
-  sprintf(
-    '<img src="%s" alt="Flujo metodológico" style="max-height:10.5cm;max-width:100%%;height:auto;">',
-    uri
-  ),
-  '<p class="caption">Figura 1. Diseño del flujo de referencia, validación y aplicación exploratoria. Los pasos B–D aún están planificados.</p>',
-  '</div>',
-  sep = "\n"
-)
-```
-
+<div class="figure" style="text-align:center">
+<!-- INSERTAR_FIGURA_FLUJO_POST_PANDOC -->
+<p class="caption">Figura 1. Diseño previsto: referencia scRNA-seq, pseudobulk independiente, NNLS/MuSiC y aplicación exploratoria a TCGA-BRCA. Las etapas B–D aún no se han ejecutado.</p>
+</div>
 
 :::
 
@@ -172,15 +179,19 @@ cat(
 
 **Lectura y QC inicial (E/05).** Se leyeron `r fmt(n_leidos)` matrices con conteos crudos `unstranded` y anotación GENCODE v36, excluyendo filas técnicas STAR. Se identificaron `r fmt(n_genes_bulk)` genes anotados, `r fmt(n_genes_positivos)` con conteos positivos en al menos una muestra y una mediana de **`r fmt(q("genes_con_conteos_positivos"))` genes detectados** y **`r fmt(q("total_conteos_genicos"), 1L)` conteos génicos** por muestra. No se descartaron muestras por umbrales de QC.
 
+**Alerta QC pendiente de revisión.** En las 50 muestras, la fracción de conteos asignada a genes `protein_coding` presenta un mínimo de **`r fmt(qc_resumen("porcentaje_conteos_protein_coding", "minimo"), 2L)` %**, frente a una mediana de **`r fmt(qc_resumen("porcentaje_conteos_protein_coding", "mediana"), 2L)` %**. Esa muestra requiere investigar su distribución de conteos, anotación y posibles variables técnicas; **no se excluye automáticamente** por un indicador aislado.
+
 **Compatibilidad entre plataformas.** Se observaron `r fmt(n_comunes)` símbolos de genes compartidos sin duplicados dentro de cada origen (`r fmt(100*n_comunes/n_genes_sc, 1L)` % de la referencia). **Esto no constituye una armonización validada de identificadores**: el bulk usa Ensembl con versión y la referencia proporciona símbolos; la conciliación de alias, duplicados y anotaciones permanece pendiente.
 
 ### Validación prevista, riesgos y limitaciones
 
-Se dividirán los **donantes** GSE176078 antes de seleccionar marcadores. Se formarán perfiles de entrenamiento y mezclas pseudobulk de donantes reservados con proporciones conocidas. Se compararán estimaciones NNLS y, si la referencia y dependencias lo permiten, MuSiC [2], con MAE, RMSE, sesgos por categoría y un comparador basal. Las mezclas de un mismo donante no se tratarán como individuos independientes. En TCGA-BRCA **no existe verdad de composición celular** para validar directamente las proporciones estimadas; la asociación con estadio seguirá siendo exploratoria [3].
+**Partición y pseudobulk (plan, no ejecutado).** Se predefine una separación aproximada **70/30 por donante** (18 para entrenamiento y 8 para prueba, sujeta a cobertura de subtipos y categorías) con una semilla documentada. Se intentará conservar representación de ER+, HER2+ y TNBC. La selección de genes y perfiles se realizará **solo en entrenamiento**. Con conteos UMI crudos de donantes reservados se sumarán células para formar **varias mezclas pseudobulk**, registrando número de células, proporciones conocidas y tipos ausentes; sus parámetros y semilla se fijarán antes de evaluar el método.
 
-**Riesgos:** preservación `Unknown`, diferencias de plataforma, efectos de lote, poblaciones ausentes en la referencia y baja representación de estadio IV. La ampliación futura hasta `r fmt(n_no_ffpe)` pacientes no FFPE queda condicionada al QC y la disponibilidad de recursos.
+**Criterios de evaluación.** Se estimarán proporciones con NNLS y, si se satisfacen las condiciones, MuSiC [2]. Se compararán contra un basal de composición promedio del entrenamiento mediante MAE, RMSE y gráficos observado–estimado por tipo; la incertidumbre se resumirá **por donante**, evitando tratar mezclas del mismo individuo como réplicas biológicas independientes. La prueba pseudobulk comparte plataforma con la referencia y podría sobrestimar la transferibilidad a TCGA-BRCA. En ese bulk **no hay proporciones verdaderas**; la asociación con estadio será observacional y exploratoria [3].
 
-**Entorno y trazabilidad.** Windows 11, Positron, R 4.5.3; Seurat 5.6.0, SeuratObject 5.4.0, BPCells 0.3.1 y `renv.lock`. Los scripts A y E/01–E/05, CSV agregados, figuras, manifiesto y MD5 se encuentran en [GitHub](https://github.com/5leyla5/proyecto-RNAseq-bulk). Los originales y matrices por muestra quedan fuera de Git. **La restauración de `renv` y la portabilidad de BPCells desde un clon limpio todavía no se han validado.**
+**Riesgos y mitigaciones:** preservación `Unknown` (auditar efectos técnicos), plataformas distintas (armonización de genes y escala de conteos), poblaciones raras o ausentes en donantes (revisar cobertura y considerar agrupaciones justificadas) y escasa representación de estadio IV (no hacer comparaciones concluyentes). La ampliación futura hasta `r fmt(n_no_ffpe)` pacientes no FFPE queda condicionada al QC y la disponibilidad de recursos.
+
+**Entorno y trazabilidad.** Windows 11, Positron, R 4.5.3; Seurat 5.6.0, SeuratObject 5.4.0, BPCells 0.3.1 y `renv.lock`. Los scripts A y E/01–E/05, CSV, manifiestos, verificaciones MD5 e informe fuente están en [GitHub](https://github.com/5leyla5/proyecto-RNAseq-bulk). El informe se regenera con `source("scripts/00_render_informe_entrega1.R")` a partir de tablas versionadas; los datos crudos y objetos grandes se conservan localmente. Algunas tablas públicas del GDC incluyen **Case ID y File ID**; no se publican matrices de expresión ni TSV clínicos originales. **La restauración limpia de `renv` y la portabilidad de BPCells aún no se han probado.**
 
 <div class="refs">
 

@@ -4,7 +4,8 @@
 
 **Entrega Parcial 1:** 19 de noviembre de 2026  
 **Corte de metadatos GDC:** 16 de noviembre de 2026  
-**Estado verificado al 17 de noviembre de 2026:** objetivo A (acceso y QC inicial) y E/01–E/05 (cohorte, clínica, piloto, descarga verificada y QC descriptivo bulk) ejecutados. **La deconvolución celular no se ha ejecutado.**  
+**Estado de los análisis al 17 de noviembre de 2026; documentación revisada el 18 de noviembre:** objetivo A (acceso y QC inicial) y E/01–E/05 (cohorte, clínica, piloto, descarga verificada y QC descriptivo bulk) ejecutados. **La deconvolución celular no se ha ejecutado.**  
+**Responsable:** Leyla Victoria Saavedra Quinteros · Estudiante del Magíster en Informática Médica, Universidad de Chile  
 **Repositorio:** https://github.com/5leyla5/proyecto-RNAseq-bulk
 
 > **Alcance de la Entrega 1.** Se documentan selección y acceso a datos, definición de cohortes, unidades de análisis, tabla preliminar de muestras, entorno computacional y factibilidad de lectura de expresión. La separación de donantes para validación, la construcción de la referencia, el pseudobulk, MuSiC/NNLS y sus resultados corresponden a etapas posteriores.
@@ -21,7 +22,7 @@
 
 1. Caracterizar y comprobar la factibilidad técnica de GSE176078 (scRNA-seq) y TCGA-BRCA (RNA-seq bulk).
 2. Construir una referencia celular con donantes de entrenamiento, sin utilizar información de los donantes reservados para seleccionar genes o ajustar el modelo.
-3. Generar pseudobulk con proporciones conocidas a partir de donantes reservados y comparar NNLS / MuSiC, si sus supuestos y dependencias resultan adecuados.
+3. Generar pseudobulk con proporciones conocidas a partir de donantes reservados y comparar NNLS y MuSiC, si sus supuestos y dependencias resultan adecuados.
 4. Evaluar MAE, RMSE y errores por categoría celular frente al comparador basal.
 5. Tras la validación interna, aplicar el procedimiento de forma exploratoria a TCGA-BRCA y discutir sus limitaciones.
 
@@ -33,6 +34,7 @@
 - **Insumos descargados manualmente:** `data/raw/GSE176078/Allcells_raw_count_out.zip` y `data/raw/GSE176078/Whole_miniatlas_meta.csv`. Los nombres, tamaños y MD5 de los originales están registrados en [`docs/01_registro_datos.csv`](docs/01_registro_datos.csv).
 - El ZIP contiene archivos de la matriz 10X (`matrix.mtx.gz`, `features.tsv.gz`, `barcodes.tsv.gz`). `scripts/01_descargar_datos.R` **comprueba insumos existentes**, no descarga automáticamente desde GEO o Broad.
 - **Inventario inicial:** 26 donantes (11 ER+, 5 HER2+, 10 TNBC), **100.064 células**, **29.733 genes** y **9 categorías celulares principales**.
+- **Cobertura desigual por donante:** *Normal Epithelial* se observa en **13/26** donantes, *Plasmablasts* en **14/26** y *Cancer Epithelial* en **20/26**. Se calculó desde [`celulas_por_donante_y_tipo.csv`](docs/A_Analisis_SingleCell/04_filtrado_qc/celulas_por_donante_y_tipo.csv), contando donantes con `n_celulas_conservadas > 0`. Los ceros no prueban ausencia biológica; pueden reflejar captura y anotación. La futura partición B deberá revisar la cobertura del conjunto de entrenamiento.
 - **Unidad biológica de independencia:** el *donante*, no cada célula. Las células son observaciones anidadas dentro de sus donantes. La partición entrenamiento/prueba todavía no se ha ejecutado.
 - **Estado:** carga, comprobaciones iniciales y QC descriptivo realizados en objetivo A. No interpretar esto como validación final de normalización, anotaciones o modelo.
 
@@ -124,7 +126,7 @@ El script [`05_leer_QC_expresion_TCGA_BRCA.R`](scripts/E_Analisis_Bulk/05_leer_Q
 
 **Correspondencia génica:** TCGA-BRCA utiliza identificadores Ensembl **con versión** (`gene_id`); el archivo `features.tsv` de GSE176078 aporta símbolos/nombres y no confirma identificadores ENSG equivalentes. Los **20.288 símbolos compartidos** son una comparación descriptiva por coincidencia exacta y no ambigua dentro de cada origen (aprox. **68,2 %** de los 29.733 símbolos de referencia). **No** constituyen todavía una armonización válida para combinar matrices o estimar composición celular. El solapamiento de Ensembl no pudo calcularse con los identificadores disponibles.
 
-**Interpretación del QC:** existe variabilidad en conteos y genes detectados entre muestras, pero el E/05 es **descriptivo**, sin exclusión por umbrales ni prueba de efectos de lote. Los conteos génicos sumados no equivalen al total de lecturas secuenciadas.
+**Interpretación del QC:** existe variabilidad en conteos y genes detectados entre muestras, pero el E/05 es **descriptivo**, sin exclusión por umbrales ni prueba de efectos de lote. En particular, el porcentaje de conteos asignados a genes `protein_coding` tiene **mínimo 78,21 %** y **mediana 97,33 %** (archivo `02_estadisticos_QC.csv`): esa observación extrema requiere revisión individual y de posibles factores técnicos, **sin eliminar la muestra automáticamente**. Los conteos génicos sumados no equivalen al total de lecturas secuenciadas.
 
 Evidencias: [`01_resumen_E05.csv`](docs/E_Analisis_Bulk/05_expresion/01_resumen_E05.csv), [`02_estadisticos_QC.csv`](docs/E_Analisis_Bulk/05_expresion/02_estadisticos_QC.csv), [`03_correspondencia_genes_GSE176078.csv`](docs/E_Analisis_Bulk/05_expresion/03_correspondencia_genes_GSE176078.csv), [`04_metodologia_E05.md`](docs/E_Analisis_Bulk/05_expresion/04_metodologia_E05.md) y [`05_sessionInfo.txt`](docs/E_Analisis_Bulk/05_expresion/05_sessionInfo.txt).
 
@@ -145,9 +147,9 @@ Figuras: [distribución de conteos](figures/E_Analisis_Bulk/05_expresion/01_cont
 | Registro de paquetes | [`renv.lock`](renv.lock) |
 | Evidencia de ejecución E/05 | [`05_sessionInfo.txt`](docs/E_Analisis_Bulk/05_expresion/05_sessionInfo.txt) |
 
-**Estado de reproducibilidad:** los scripts de E/01–E/05 y sus salidas agregadas están versionados, y los manifiestos y MD5 permiten auditar los datos de entrada. Sin embargo, **aún no está probada** la reconstrucción íntegra desde un clon limpio mediante `renv::restore()`. Tampoco está demostrada la portabilidad de los `.rds` que dependen del almacén externo de BPCells. El flujo A requiere reconstruir dichos objetos desde los insumos originales si sus rutas locales no son válidas en otro equipo.
+**Estado de reproducibilidad:** los scripts E/01–E/05, los resúmenes agregados y los catálogos GDC públicos están versionados, y los manifiestos y MD5 permiten auditar los datos de entrada. Sin embargo, **aún no está probada** la reconstrucción íntegra desde un clon limpio mediante `renv::restore()`. Tampoco está demostrada la portabilidad de los `.rds` que dependen del almacén externo de BPCells. El flujo A requiere reconstruir dichos objetos desde los insumos originales si sus rutas locales no son válidas en otro equipo.
 
-Los datos brutos (`data/raw/`) y las matrices, objetos Seurat/BPCells, anotaciones y métricas por muestra (`data/processed/`) **se excluyen de Git** con `.gitignore`. Para reproducir desde cero es necesario volver a obtener los archivos públicos originales, conservando el corte/MD5, y colocarlos en las rutas indicadas. No se publican rutas personales ni credenciales.
+Los datos brutos (`data/raw/`) y las matrices, objetos Seurat/BPCells y métricas detalladas por muestra (`data/processed/`) **se excluyen de Git** con `.gitignore`. **Excepción deliberada:** las tablas de inventario y selección E/01–E/03 publicadas bajo `docs/E_Analisis_Bulk/` sí incluyen identificadores **públicos del GDC** (`Case ID`, `Sample ID` y/o `File ID`) para auditar el piloto. No se publican las matrices de expresión, TSV clínicos originales ni la tabla clínica paciente-nivel procesada. La ausencia de matrices en Git obliga a obtener de nuevo los archivos públicos originales para reproducir análisis desde cero; el informe puede regenerarse usando los CSV versionados. No se publican credenciales ni rutas personales.
 
 ## 6. Procedimiento de reproducción en Windows y Positron
 
@@ -252,11 +254,11 @@ Revisar los scripts disponibles bajo `scripts/A_Analisis_SingleCell/` y los regi
 | **E posterior. Aplicación** | Armonizar genes, aplicar referencia validada a TCGA-BRCA | **Pendiente** |
 | **F. Discusión** | Sesgos, validez, alcance y limitaciones | **Pendiente** |
 
-**Diseño de validación propuesto, todavía no ejecutado:** separar donantes independientes en entrenamiento y prueba **antes** de calcular perfiles o seleccionar marcadores; generar pseudobulk con proporciones conocidas en donantes reservados; comparar NNLS/MuSiC con una línea basal; reportar MAE/RMSE por categoría y la variabilidad por donante. Solo entonces interpretar las proporciones estimadas en bulk reales.
+**Diseño de validación propuesto, todavía no ejecutado:** partición aproximada **70/30 por donante** (18 entrenamiento y 8 prueba, sujeta a distribución de ER+/HER2+/TNBC y cobertura celular), con semilla y asignación documentadas. La selección de genes y construcción de firmas se hará **solo sobre entrenamiento**. Las mezclas pseudobulk de prueba sumarán conteos UMI crudos de células de donantes reservados; se conservarán la composición celular conocida, el total de células y la identidad del donante. Se compararán NNLS y, si es factible, MuSiC contra un basal de composición promedio del entrenamiento, con MAE, RMSE y sesgos por tipo. La unidad independiente de resumen será **el donante**: varias mezclas de una misma persona no son réplicas biológicas independientes. No se utilizarán los donantes de evaluación para optimizar marcadores.
 
 **Precauciones:** TCGA-BRCA no aporta proporciones celulares verdaderas para validar las predicciones. La asociación de composición celular estimada con estadio AJCC será observacional y **exploratoria**, incluso si posteriormente se amplía la cohorte; los 20 pacientes estadio IV de la cohorte completa y la categoría de preservación `Unknown` limitan la interpretación. No confundir asociación con causalidad.
 
-## 8. Evidencia para el informe de la Entrega 1
+## 8. Informe R Markdown y evidencias de la Entrega 1
 
 Los **cinco criterios de diseño y factibilidad** se respaldan así:
 
@@ -268,15 +270,26 @@ Los **cinco criterios de diseño y factibilidad** se respaldan así:
 | Tabla preliminar de muestras | Resúmenes y QC E/01–E/05; tabla de sección 3 | **Demostrado** |
 | Ambiente computacional inicial | R/Positron, `renv.lock`, `sessionInfo`, herramienta GDC | **Configurado; restauración limpia pendiente** |
 
-**Informe de 2–3 páginas:** se preparará y publicará por separado, con la misma pregunta, denominadores y resultados aquí registrados. Al corte de esta actualización, **no se ha confirmado la publicación** en GitHub de `docs/Entrega_1/Informe_Entrega_1.md`, `docs/Entrega_1/Informe_Entrega_1.docx` ni de un generador del informe; por ello no se presenta esa generación documental como reproducida o probada.
+**Informe reproducible ya publicado:**
 
-Antes de entregar: guardar el informe (y, si corresponde, su fuente R Markdown/Quarto o script generador) dentro del repositorio, ejecutar su regeneración desde las tablas publicadas, revisar paginación y verificar concordancia con este README. No es necesario ejecutar MuSiC, NNLS ni inferencias clínicas antes de una entrega de diseño y factibilidad.
+- [Fuente R Markdown — `Informe_Entrega_1.Rmd`](docs/Entrega_1/Informe_Entrega_1.Rmd): texto, verificaciones automáticas y cifras obtenidas de los CSV versionados.
+- [Informe HTML generado — `Informe_Entrega_1.html`](docs/Entrega_1/Informe_Entrega_1.html): salida de lectura/impresión; incluye la imagen del flujo incrustada para que no dependa de rutas locales.
+- [Diagrama del flujo](docs/Entrega_1/assets/flujo_metodologico.png) y [estilos de impresión](docs/Entrega_1/estilo_informe.css).
+- [Script de generación](scripts/00_render_informe_entrega1.R) y [procedimiento de reproducción](docs/Entrega_1/LEEME_informe.md).
+
+**Regeneración (consola R de Positron, desde la raíz):**
+
+```r
+source("scripts/00_render_informe_entrega1.R")
+```
+
+El informe se regenera a partir de **resultados tabulados ya versionados**, sin necesitar descargar las 50 matrices cada vez. No equivale a haber probado la reconstrucción íntegra del análisis original en un equipo nuevo. Antes de entregar, comprobar en la vista de impresión que el HTML quede en **tres páginas A4**, con encabezado/pie del navegador desactivados si corresponde, y verificar que imagen, tablas, resultados y bibliografía se vean íntegros. No se ha generado un Word; no es necesario ejecutar MuSiC, NNLS ni inferencias clínicas para esta etapa.
 
 ## 9. Limitaciones y tareas futuras
 
 - **Armonización de genes:** resolver Ensembl con versión frente a símbolos de GSE176078, alias, duplicados y anotaciones. El valor **20.288** es una comprobación preliminar, no una matriz armonizada.
-- **QC:** las distribuciones E/05 no bastan para declarar todas las muestras de calidad equivalente. Revisar extremos, porcentajes `protein_coding`, posibles lotes y predefinir reglas de filtrado antes de excluir casos.
-- **Entrenamiento y validación:** mantener a los donantes de evaluación completamente fuera de selección de genes y ajuste; las células de un mismo donante no son réplicas independientes.
+- **QC:** las distribuciones E/05 no bastan para declarar todas las muestras de calidad equivalente. Investigar la muestra con 78,21 % de conteos `protein_coding` (mediana 97,33 %), posibles lotes y predefinir criterios de filtrado antes de excluir casos.
+- **Entrenamiento y validación:** verificar cobertura desigual de categorías por donante (13/26 Normal Epithelial; 14/26 Plasmablasts), mantener a los donantes de evaluación fuera de selección de genes y ajuste, y resumir errores por donante, no por célula o mezcla.
 - **Entorno:** probar `renv::restore()` desde un clon limpio antes de declarar reproducibilidad integral; revisar dependencias de BPCells y rutas locales.
 - **Análisis clínico:** el piloto no está diseñado para comparaciones por estadio; contemplar ampliar a la cohorte no FFPE tras el QC y comprobar cuántos pacientes tienen simultáneamente expresión elegible y estadio conocido.
 - **Referencias metodológicas:** MuSiC y NNLS son métodos **propuestos**. No hay todavía proporciones estimadas, métricas de desempeño ni asociaciones clínicas.
@@ -293,4 +306,4 @@ Antes de entregar: guardar el informe (y, si corresponde, su fuente R Markdown/Q
 
 ---
 
-**Integridad científica:** las cifras de este README corresponden a tablas CSV generadas por scripts ejecutados y verificadas en el repositorio. Los resultados previstos para B–D y la aplicación final de E no deben interpretarse como resultados obtenidos. No se distribuyen matrices crudas ni datos por paciente en GitHub.
+**Integridad científica:** las cifras documentadas provienen de CSV generados por scripts ejecutados y versionados. B–D y la aplicación final de E siguen pendientes. No se distribuyen matrices crudas ni datos clínicos originales por paciente en GitHub; **sí** se distribuyen tablas de metadatos con identificadores públicos GDC necesarios para auditar la selección, como se aclara en la sección 5.
