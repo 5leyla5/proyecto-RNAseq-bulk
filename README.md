@@ -4,7 +4,7 @@
 
 **Entrega Parcial 1:** 19 de noviembre de 2026  
 **Corte de metadatos GDC:** 16 de noviembre de 2026  
-**Estado de los análisis al 17 de noviembre de 2026; documentación revisada el 18 de noviembre:** objetivo A (acceso y QC inicial) y E/01–E/05 (cohorte, clínica, piloto, descarga verificada y QC descriptivo bulk) ejecutados. **La deconvolución celular no se ha ejecutado.**  
+**Estado actualizado al 19 de noviembre de 2026:** objetivo A (acceso y QC inicial) y E/01–E/05 (cohorte, clínica, piloto, descarga verificada y QC descriptivo bulk) ejecutados. **La deconvolución celular no se ha ejecutado.**
 **Responsable:** Leyla Victoria Saavedra Quinteros · Estudiante del Magíster en Informática Médica, Universidad de Chile  
 **Repositorio:** https://github.com/5leyla5/proyecto-RNAseq-bulk
 
@@ -45,7 +45,7 @@
 - **Entradas locales:** `data/raw/TCGA_BRCA/gdc_sample_sheet.tsv`, `gdc_manifest.txt` y `cohort_TCGA_BRCA_LSQ.2026-11-16.tsv`; archivos clínicos correctos de **TCGA-BRCA** en `data/raw/TCGA_BRCA/clinical/` y archivos de biospecimen en `data/raw/TCGA_BRCA/biospecimen/`. No mezclar con una exportación previa de `TCGA-CESC`.
 - **Unidad clínica:** un `Case ID` = un paciente. **Unidad de expresión:** una muestra/archivo STAR Counts seleccionado por paciente. Un paciente con varios archivos no se contabiliza varias veces como individuo independiente.
 - **Inventario:** 1.111 archivos STAR Counts, 1.106 `Sample ID` distintos y **1.095 pacientes** distintos; 11 pacientes tienen múltiples archivos (16 archivos adicionales frente al número de pacientes).
-- **Estado:** metadatos y clínica validados; 50 matrices del piloto descargadas e íntegras; lectura y QC descriptivo E/05 ejecutados. Las 1.111 matrices de la cohorte completa **no** se han descargado.
+- **Estado:** metadatos y clínica validados; 50 matrices del piloto descargadas e íntegras; lectura y QC descriptivo E/05 ejecutados. La cohorte ampliada de **1.093 archivos** fue descargada en Windows y verificada íntegramente mediante MD5. El QC de expresión de los 1.093 archivos y su transferencia a Kutral siguen pendientes.
 
 ## 3. Cohortes y tabla preliminar para la Entrega 1
 
@@ -57,8 +57,8 @@
 | Categorías celulares conocidas | 9 principales | No observadas; **por estimar** |
 | Archivos de expresión | ZIP con conteos unicelulares | 1.111 STAR Counts catalogados |
 | Unidad principal para independencia | Donante | Paciente |
-| Datos utilizados hasta esta entrega | Referencia scRNA y QC inicial | Piloto de 50 muestras (1 por paciente) |
-| Control inicial | Realizado (objetivo A) | 50/50 MD5 correctos y QC descriptivo E/05 |
+| Datos utilizados hasta esta entrega | Referencia scRNA y QC inicial | Piloto de 50 muestras con QC; cohorte ampliada de 1.093 con MD5 validado |
+| Control inicial | Realizado (objetivo A) | 1.093/1.093 MD5 correctos; QC descriptivo E/05 solo en el piloto de 50 |
 
 ### 3.1 Cohorte bulk y disponibilidad clínica
 
@@ -85,7 +85,7 @@ Evidencias: [`01_resumen_TCGA_BRCA.csv`](docs/E_Analisis_Bulk/01_cohorte/01_resu
 3. Seleccionar aleatoriamente 50 pacientes con **`set.seed(20261116)`** en E/01. El piloto no se estratifica ni se elige con base en estadio.
 4. E/03 comprueba la coincidencia exacta de los 50 `File ID` con E/01 y el estadio de los pacientes, **sin sustituir casos**.
 
-**Piloto comprobado:** 50 pacientes / 50 archivos de tumor primario; **34 OCT, 16 Unknown y 0 FFPE**; estadio **I: 6, II: 33, III: 10, IV: 1**. El piloto sirve para **factibilidad técnica**, no tiene potencia para inferencias por estadio. La ampliación futura a hasta 1.093 pacientes no FFPE dependerá del QC, concordancia clínica y disponibilidad de recursos.
+**Piloto comprobado:** 50 pacientes / 50 archivos de tumor primario; **34 OCT, 16 Unknown y 0 FFPE**; estadio **I: 6, II: 33, III: 10, IV: 1**. El piloto sirve para **factibilidad técnica**, no tiene potencia para inferencias por estadio. La cohorte ampliada de 1.093 pacientes no FFPE ya fue descargada y verificada por MD5; su QC de expresión permanece pendiente.
 
 Evidencias: [`01_resumen_piloto.csv`](docs/E_Analisis_Bulk/03_piloto/01_resumen_piloto.csv), [`02_estadios_piloto.csv`](docs/E_Analisis_Bulk/03_piloto/02_estadios_piloto.csv), [`03_manifest_piloto_50_FINAL.txt`](docs/E_Analisis_Bulk/03_piloto/03_manifest_piloto_50_FINAL.txt), [`04_criterios_piloto.md`](docs/E_Analisis_Bulk/03_piloto/04_criterios_piloto.md).
 
@@ -238,11 +238,11 @@ El script E/05 requiere los 50 archivos, sus MD5 correctos y el ZIP de GSE176078
 
 ### Paso 6. Reproducir la referencia scRNA (objetivo A)
 
-Revisar los scripts disponibles bajo `scripts/A_Analisis_SingleCell/` y los registros del directorio `docs/`. Los insumos originales son GSE176078/SCP1039. El QC inicial A se ejecutó en el equipo de origen; sus objetos `.rds` y el almacén BPCells son locales. **La restauración completa de A desde un clon limpio aún está pendiente de prueba y documentación detallada.**
+Revisar los scripts disponibles bajo `scripts/A_Analisis_SingleCell/` y los registros del directorio `docs/`. Los insumos originales son GSE176078/SCP1039. El QC inicial A/01–A/04 se ejecutó en Kutral mediante Slurm, R 4.5.1 y Seurat 6.0.0; sus objetos `.rds` y el almacén BPCells son locales. **La restauración completa de A desde un clon limpio aún está pendiente de prueba y documentación detallada.**
 
 ## 7. Flujo de análisis A–F y estado actual
 
-| Objetivo | Trabajo | Estado al 17-11-2026 |
+| Objetivo | Trabajo | Estado al 19-11-2026 |
 |---|---|---|
 | **A. scRNA-seq** | Acceso, carga, controles y QC inicial GSE176078 | **Ejecutado:** QC descriptivo inicial |
 | **B. Referencia celular** | Separar donantes antes de selección de genes y construir perfiles celulares | **Pendiente** |
@@ -250,7 +250,8 @@ Revisar los scripts disponibles bajo `scripts/A_Analisis_SingleCell/` y los regi
 | **D. Evaluación** | MAE, RMSE y errores por tipo celular, evitando pseudorreplicación | **Pendiente** |
 | **E/01–E/03. Cohorte TCGA** | Selección, clínica y manifiesto de 50 pacientes | **Ejecutado** |
 | **E/04. Descarga y MD5** | Obtener y auditar los 50 archivos STAR Counts | **Ejecutado y verificado** |
-| **E/05. QC bulk** | Lectura de 50 matrices, QC descriptivo y solapamiento preliminar de símbolos | **Ejecutado** |
+| **E/05. QC bulk** | Lectura de 50 matrices, QC descriptivo y solapamiento preliminar de símbolos | **Ejecutado en el piloto** |
+| **E/06–E/08. Cohorte completa** | 1.093 archivos seleccionados, descargados y validados por MD5 en Windows | **Integridad completa; QC pendiente** |
 | **E posterior. Aplicación** | Armonizar genes, aplicar referencia validada a TCGA-BRCA | **Pendiente** |
 | **F. Discusión** | Sesgos, validez, alcance y limitaciones | **Pendiente** |
 
@@ -291,7 +292,7 @@ El informe se regenera a partir de **resultados tabulados ya versionados**, sin 
 - **QC:** las distribuciones E/05 no bastan para declarar todas las muestras de calidad equivalente. Investigar la muestra con 78,21 % de conteos `protein_coding` (mediana 97,33 %), posibles lotes y predefinir criterios de filtrado antes de excluir casos.
 - **Entrenamiento y validación:** verificar cobertura desigual de categorías por donante (13/26 Normal Epithelial; 14/26 Plasmablasts), mantener a los donantes de evaluación fuera de selección de genes y ajuste, y resumir errores por donante, no por célula o mezcla.
 - **Entorno:** probar `renv::restore()` desde un clon limpio antes de declarar reproducibilidad integral; revisar dependencias de BPCells y rutas locales.
-- **Análisis clínico:** el piloto no está diseñado para comparaciones por estadio; contemplar ampliar a la cohorte no FFPE tras el QC y comprobar cuántos pacientes tienen simultáneamente expresión elegible y estadio conocido.
+- **Análisis clínico:** el piloto no está diseñado para comparaciones por estadio; realizar QC de la cohorte ampliada de 1.093 archivos y comprobar cuántos pacientes tienen simultáneamente expresión elegible, calidad aceptable y estadio conocido.
 - **Referencias metodológicas:** MuSiC y NNLS son métodos **propuestos**. No hay todavía proporciones estimadas, métricas de desempeño ni asociaciones clínicas.
 
 ## 10. Referencias y documentación
@@ -319,3 +320,7 @@ El informe se regenera a partir de **resultados tabulados ya versionados**, sin 
 
 Los scripts estan en scripts/<objetivo>/; las tablas en docs/<objetivo>/
 y las figuras en figures/<objetivo>/. Los datos grandes no se suben a GitHub.
+
+### Reproducción en Kutral
+
+Consultar [REPRODUCCION_KUTRAL.md](docs/Entrega_1/REPRODUCCION_KUTRAL.md) para conocer el entorno, los trabajos Slurm y sus limitaciones.
