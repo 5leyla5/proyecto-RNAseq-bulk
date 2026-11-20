@@ -158,6 +158,8 @@ res_tabla <- data.frame(
 
 **Objetivos específicos.** (i) Caracterizar las fuentes y las cohortes; (ii) establecer una referencia con independencia por donante; (iii) generar pseudobulk con proporciones conocidas; (iv) evaluar NNLS y MuSiC con MAE, RMSE y sesgos por tipo celular frente al comparador basal; y (v) aplicar exploratoriamente el procedimiento a TCGA-BRCA tras su validación interna.
 
+**Relación con Tran et al. (2023).** Ese estudio ya comparó nueve métodos de deconvolución en cáncer de mama utilizando mezclas simuladas, separación por paciente y datos TCGA [3]. Nuestro aporte propuesto es una implementación acotada y auditable, con NNLS/MuSiC, comparador basal y trazabilidad del QC. No se propone un método nuevo y la evaluación aún está pendiente.
+
 ### Fuentes de información y alcance ejecutado
 
 **GSE176078 / Broad SCP1039** [1]: atlas de scRNA-seq de cáncer de mama, con `r fmt(n_donantes)` donantes, `r fmt(n_celulas)` células, `r fmt(n_genes_sc)` genes y nueve categorías celulares principales. Los conteos UMI y los metadatos originales están disponibles y el QC descriptivo inicial (objetivo A) está documentado. Se decidió **no aplicar filtros adicionales** tras revisar criterios del atlas y distribuciones por donante/tipo celular; ello no garantiza ausencia de dobletes, contaminación ambiental ni efectos de lote. Los donantes cubren subtipos ER+ (11), HER2+ (5) y TNBC (10).

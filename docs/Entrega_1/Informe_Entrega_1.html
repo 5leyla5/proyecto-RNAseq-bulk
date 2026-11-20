@@ -123,6 +123,12 @@ donante; (iii) generar pseudobulk con proporciones conocidas; (iv)
 evaluar NNLS y MuSiC con MAE, RMSE y sesgos por tipo celular frente al
 comparador basal; y (v) aplicar exploratoriamente el procedimiento a
 TCGA-BRCA tras su validación interna.</p>
+<p><strong>Relación con Tran et al. (2023).</strong> Ese estudio ya
+comparó nueve métodos de deconvolución en cáncer de mama utilizando
+mezclas simuladas, separación por paciente y datos TCGA [3]. Nuestro
+aporte propuesto es una implementación acotada y auditable, con
+NNLS/MuSiC, comparador basal y trazabilidad del QC. No se propone un
+método nuevo y la evaluación aún está pendiente.</p>
 <div id="fuentes-de-información-y-alcance-ejecutado" class="section level3">
 <h3>Fuentes de información y alcance ejecutado</h3>
 <p><strong>GSE176078 / Broad SCP1039</strong> [1]: atlas de scRNA-seq de
