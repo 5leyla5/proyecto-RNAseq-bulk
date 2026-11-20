@@ -11,7 +11,7 @@
 # 1. Verificar la carpeta de trabajo ----------------------------
 raiz <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
 
-if (basename(raiz) != "Proyecto RNA-seq bulk") {
+if (!file.exists("README.md") || !dir.exists("scripts")) {
   stop("Abre primero la carpeta 'Proyecto RNA-seq bulk' en Positron.")
 }
 

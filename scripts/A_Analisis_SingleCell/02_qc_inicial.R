@@ -1,3 +1,4 @@
+options(bitmapType = "cairo")
 # =============================================================
 # BIOINFORMATICA II - PROYECTO RNA-seq bulk
 # OBJETIVO A / ETAPA 02 - QC inicial de celulas (ANTES de filtrar)

@@ -26,6 +26,9 @@ archivos <- c(
   e04 = "docs/E_Analisis_Bulk/04_descarga/02_resumen_descarga.csv",
   integridad = "docs/E_Analisis_Bulk/04_descarga/01_integridad_archivos.csv",
   e05 = "docs/E_Analisis_Bulk/05_expresion/01_resumen_E05.csv",
+  e06 = "docs/E_Analisis_Bulk/06_cohorte_completa/resumen_cohorte_completa.csv",
+  manifest_completo = "docs/E_Analisis_Bulk/06_cohorte_completa/manifest_1093_TCGA_BRCA.txt",
+  integridad_completa = "docs/E_Analisis_Bulk/06_cohorte_completa/integridad_1093.csv",
   qc = "docs/E_Analisis_Bulk/05_expresion/02_estadisticos_QC.csv",
   correspondencia = "docs/E_Analisis_Bulk/05_expresion/03_correspondencia_genes_GSE176078.csv",
   figura = "docs/Entrega_1/assets/flujo_metodologico.png"
@@ -39,8 +42,12 @@ E1 <- leer(archivos[["e01"]]); E2 <- leer(archivos[["e02"]])
 E3 <- leer(archivos[["e03"]]); ES <- leer(archivos[["estadios"]])
 E4 <- leer(archivos[["e04"]]); EI <- leer(archivos[["integridad"]])
 E5 <- leer(archivos[["e05"]]); Q <- leer(archivos[["qc"]])
+E6 <- leer(archivos[["e06"]])
+IV <- read.csv(archivos[["integridad_completa"]], fileEncoding = "UTF-8-BOM", stringsAsFactors = FALSE)
 EC <- leer(archivos[["correspondencia"]])
 M <- read.delim(archivos[["manifest"]], check.names = FALSE, stringsAsFactors = FALSE, sep = "\t")
+MC <- read.delim(archivos[["manifest_completo"]], check.names = FALSE,
+                 stringsAsFactors = FALSE, sep = "\t")
 
 v <- function(tabla, clave, campo = "valor") {
   p <- which(as.character(tabla$indicador) == clave)
@@ -91,6 +98,24 @@ bytes_manifest <- sum(as.numeric(M$size))
 stopifnot(nrow(A) == 1L, n_donantes == 26, n_celulas == 100064, n_genes_sc == 29733)
 stopifnot(as.numeric(A4$despues[A4$indicador == "celulas"]) == n_celulas)
 stopifnot(n_bulk_pac == 1095, n_catalogo == 1111, n_no_ffpe == 1093)
+stopifnot(v(E6, "Pacientes no FFPE") == n_no_ffpe,
+          nrow(MC) == n_no_ffpe,
+          !anyDuplicated(MC$id),
+          all(c("id", "filename", "md5", "size", "state") %in% names(MC)),
+          round(sum(as.numeric(MC$size))/1e9, 3) == 4.638)
+stopifnot(
+  all(c("id", "filename", "estado", "md5_esperado",
+        "md5_real", "size_esperado", "size_real") %in% names(IV)),
+  nrow(IV) == n_no_ffpe,
+  !anyDuplicated(IV$id),
+  setequal(IV$id, MC$id),
+  all(IV$filename == MC$filename[match(IV$id, MC$id)]),
+  all(IV$estado == "MD5_OK"),
+  all(as.numeric(IV$size_real) == as.numeric(IV$size_esperado)),
+  all(tolower(IV$md5_real) == tolower(IV$md5_esperado)),
+  all(tolower(IV$md5_esperado) ==
+      tolower(MC$md5[match(IV$id, MC$id)]))
+)
 stopifnot(n_estadio <= n_bulk_pac, n_piloto == 50, n_leidos == n_piloto)
 stopifnot(nrow(M) == n_piloto, !anyDuplicated(M$id), nrow(EI) == n_piloto)
 stopifnot(n_md5 == n_piloto, v(E4, "Archivos presentes") == n_piloto,
@@ -137,7 +162,7 @@ res_tabla <- data.frame(
 
 **GSE176078 / Broad SCP1039** [1]: atlas de scRNA-seq de cáncer de mama, con `r fmt(n_donantes)` donantes, `r fmt(n_celulas)` células, `r fmt(n_genes_sc)` genes y nueve categorías celulares principales. Los conteos UMI y los metadatos originales están disponibles y el QC descriptivo inicial (objetivo A) está documentado. Se decidió **no aplicar filtros adicionales** tras revisar criterios del atlas y distribuciones por donante/tipo celular; ello no garantiza ausencia de dobletes, contaminación ambiental ni efectos de lote. Los donantes cubren subtipos ER+ (11), HER2+ (5) y TNBC (10).
 
-**TCGA-BRCA / NCI GDC**: `r fmt(n_catalogo)` archivos de expresión STAR Counts de tumor primario correspondientes a `r fmt(n_bulk_pac)` pacientes distintos. Se cuenta con metadatos, datos clínicos y una selección de `r fmt(n_piloto)` archivos bulk descargados e íntegros (objetivo E/01–E/05). **No se ha realizado deconvolución.**
+**TCGA-BRCA / NCI GDC**: `r fmt(n_catalogo)` archivos de expresión STAR Counts de tumor primario correspondientes a `r fmt(n_bulk_pac)` pacientes distintos. Se cuenta con metadatos, datos clínicos y una selección de `r fmt(n_piloto)` archivos bulk descargados e íntegros (objetivo E/01–E/05). La cohorte ampliada E/06 incluye un manifiesto validado de `r fmt(n_no_ffpe)` pacientes elegibles (4,638 GB previstos); sus archivos fueron descargados en Windows y `r fmt(nrow(IV))`/`r fmt(n_no_ffpe)` superaron la verificación MD5; el QC de expresión completo sigue pendiente. **No se ha realizado deconvolución.**
 
 **Unidad y alcance.** En scRNA-seq la observación es la célula, pero la unidad independiente para dividir entrenamiento/prueba es el donante. En TCGA-BRCA la unidad clínica es el paciente, asociado a un archivo tumoral primario seleccionado. Esta entrega demuestra **diseño y factibilidad**, no predicción validada, resultados de deconvolución ni asociaciones por estadio.
 
@@ -173,7 +198,7 @@ knitr::kable(res_tabla, format = "html", row.names = FALSE, escape = TRUE,
 
 ## 3. Resultados de factibilidad, controles y reproducción
 
-### Resultados ejecutados al 17-11-2026
+### Resultados documentados al 19-11-2026
 
 **Acceso e integridad (E/04).** Los `r fmt(n_piloto)` archivos del manifiesto GDC tienen un tamaño total de `r fmt(bytes_manifest)` bytes (212,05 MB). La comprobación en R confirmó **`r fmt(n_md5)`/`r fmt(n_piloto)` archivos presentes con tamaño y MD5 correctos**, y cero archivos faltantes o erróneos. La descarga efectiva se hizo mediante `gdc-client` 2.3 en PowerShell; el script de descarga automatizada se redactó posteriormente y no se ha probado como ejecución inicial.
 
@@ -189,9 +214,9 @@ knitr::kable(res_tabla, format = "html", row.names = FALSE, escape = TRUE,
 
 **Criterios de evaluación.** Se estimarán proporciones con NNLS y, si se satisfacen las condiciones, MuSiC [2]. Se compararán contra un basal de composición promedio del entrenamiento mediante MAE, RMSE y gráficos observado–estimado por tipo; la incertidumbre se resumirá **por donante**, evitando tratar mezclas del mismo individuo como réplicas biológicas independientes. La prueba pseudobulk comparte plataforma con la referencia y podría sobrestimar la transferibilidad a TCGA-BRCA. En ese bulk **no hay proporciones verdaderas**; la asociación con estadio será observacional y exploratoria [3].
 
-**Riesgos y mitigaciones:** preservación `Unknown` (auditar efectos técnicos), plataformas distintas (armonización de genes y escala de conteos), poblaciones raras o ausentes en donantes (revisar cobertura y considerar agrupaciones justificadas) y escasa representación de estadio IV (no hacer comparaciones concluyentes). La ampliación futura hasta `r fmt(n_no_ffpe)` pacientes no FFPE queda condicionada al QC y la disponibilidad de recursos.
+**Riesgos y mitigaciones:** preservación `Unknown` (auditar efectos técnicos), plataformas distintas (armonización de genes y escala de conteos), poblaciones raras o ausentes en donantes (revisar cobertura y considerar agrupaciones justificadas) y escasa representación de estadio IV (no hacer comparaciones concluyentes). La cohorte completa de `r fmt(n_no_ffpe)` pacientes ya está definida en E/06; tras las interrupciones de GDC, la descarga terminó en Windows y se verificaron `r fmt(nrow(IV))` archivos con MD5 correcto. No se atribuyen resultados de QC bulk a estos nuevos archivos.
 
-**Entorno y trazabilidad.** Windows 11, Positron, R 4.5.3; Seurat 5.6.0, SeuratObject 5.4.0, BPCells 0.3.1 y `renv.lock`. Los scripts A y E/01–E/05, CSV, manifiestos, verificaciones MD5 e informe fuente están en [GitHub](https://github.com/5leyla5/proyecto-RNAseq-bulk). El informe se regenera con `source("scripts/00_render_informe_entrega1.R")` a partir de tablas versionadas; los datos crudos y objetos grandes se conservan localmente. Algunas tablas públicas del GDC incluyen **Case ID y File ID**; no se publican matrices de expresión ni TSV clínicos originales. **La restauración limpia de `renv` y la portabilidad de BPCells aún no se han probado.**
+**Entorno y trazabilidad.** El piloto bulk se trabajó en Windows 11 con Positron y R 4.5.3; el QC A/01–A/04 se ejecutó en Kutral mediante Slurm, R 4.5.1 y Seurat 6.0.0. Se conservaron registros de ejecución y dependencias. Los scripts A y E/01–E/05, CSV, manifiestos, verificaciones MD5 e informe fuente están en [GitHub](https://github.com/5leyla5/proyecto-RNAseq-bulk). El informe se regenera con `source("scripts/00_render_informe_entrega1.R")` a partir de tablas versionadas; los datos crudos y objetos grandes se conservan localmente. Algunas tablas públicas del GDC incluyen **Case ID y File ID**; no se publican matrices de expresión ni TSV clínicos originales. **La restauración limpia de `renv` y la portabilidad de BPCells aún no se han probado.**
 
 <div class="refs">
 

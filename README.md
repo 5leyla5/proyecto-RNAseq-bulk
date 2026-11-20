@@ -307,3 +307,15 @@ El informe se regenera a partir de **resultados tabulados ya versionados**, sin 
 ---
 
 **Integridad científica:** las cifras documentadas provienen de CSV generados por scripts ejecutados y versionados. B–D y la aplicación final de E siguen pendientes. No se distribuyen matrices crudas ni datos clínicos originales por paciente en GitHub; **sí** se distribuyen tablas de metadatos con identificadores públicos GDC necesarios para auditar la selección, como se aclara en la sección 5.
+
+## Estructura de objetivos (A-F)
+
+- **A_Analisis_SingleCell:** QC, normalizacion, PCA, UMAP y anotaciones.
+- **B_Referencia_Celular:** separacion de donantes y referencia.
+- **C_Pseudobulk_Deconvolucion:** mezclas y deconvolucion.
+- **D_Evaluacion_Modelo:** MAE, RMSE y comparaciones.
+- **E_Analisis_Bulk:** aplicacion a muestras bulk reales.
+- **F_Discusion_Critica:** limitaciones y analisis critico.
+
+Los scripts estan en scripts/<objetivo>/; las tablas en docs/<objetivo>/
+y las figuras en figures/<objetivo>/. Los datos grandes no se suben a GitHub.

@@ -18,3 +18,4 @@ logs/
 renv/library/
 renv/staging/
 renv/sandbox/
+.DS_Store

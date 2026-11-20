@@ -137,8 +137,12 @@ ER+ (11), HER2+ (5) y TNBC (10).</p>
 <p><strong>TCGA-BRCA / NCI GDC</strong>: 1.111 archivos de expresión
 STAR Counts de tumor primario correspondientes a 1.095 pacientes
 distintos. Se cuenta con metadatos, datos clínicos y una selección de 50
-archivos bulk descargados e íntegros (objetivo E/01–E/05). <strong>No se
-ha realizado deconvolución.</strong></p>
+archivos bulk descargados e íntegros (objetivo E/01–E/05). La cohorte
+ampliada E/06 incluye un manifiesto validado de 1.093 pacientes
+elegibles (4,638 GB previstos); sus archivos fueron descargados en
+Windows y 1.093/1.093 superaron la verificación MD5; el QC de expresión
+completo sigue pendiente. <strong>No se ha realizado
+deconvolución.</strong></p>
 <p><strong>Unidad y alcance.</strong> En scRNA-seq la observación es la
 célula, pero la unidad independiente para dividir entrenamiento/prueba
 es el donante. En TCGA-BRCA la unidad clínica es el paciente, asociado a
@@ -285,8 +289,8 @@ etapas B–D aún no se han ejecutado.
 </div>
 <div id="resultados-de-factibilidad-controles-y-reproducción" class="section level2 report-page">
 <h2>3. Resultados de factibilidad, controles y reproducción</h2>
-<div id="resultados-ejecutados-al-17-11-2026" class="section level3">
-<h3>Resultados ejecutados al 17-11-2026</h3>
+<div id="resultados-documentados-al-19-11-2026" class="section level3">
+<h3>Resultados documentados al 19-11-2026</h3>
 <p><strong>Acceso e integridad (E/04).</strong> Los 50 archivos del
 manifiesto GDC tienen un tamaño total de 212.050.127 bytes (212,05 MB).
 La comprobación en R confirmó <strong>50/50 archivos presentes con
@@ -342,11 +346,14 @@ exploratoria [3].</p>
 (armonización de genes y escala de conteos), poblaciones raras o
 ausentes en donantes (revisar cobertura y considerar agrupaciones
 justificadas) y escasa representación de estadio IV (no hacer
-comparaciones concluyentes). La ampliación futura hasta 1.093 pacientes
-no FFPE queda condicionada al QC y la disponibilidad de recursos.</p>
-<p><strong>Entorno y trazabilidad.</strong> Windows 11, Positron, R
-4.5.3; Seurat 5.6.0, SeuratObject 5.4.0, BPCells 0.3.1 y
-<code>renv.lock</code>. Los scripts A y E/01–E/05, CSV, manifiestos,
+comparaciones concluyentes). La cohorte completa de 1.093 pacientes ya
+está definida en E/06; tras las interrupciones de GDC, la descarga
+terminó en Windows y se verificaron 1.093 archivos con MD5 correcto. No
+se atribuyen resultados de QC bulk a estos nuevos archivos.</p>
+<p><strong>Entorno y trazabilidad.</strong> El piloto bulk se trabajó en
+Windows 11 con Positron y R 4.5.3; el QC A/01–A/04 se ejecutó en Kutral
+mediante Slurm, R 4.5.1 y Seurat 6.0.0. Se conservaron registros de
+ejecución y dependencias. Los scripts A y E/01–E/05, CSV, manifiestos,
 verificaciones MD5 e informe fuente están en <a href="https://github.com/5leyla5/proyecto-RNAseq-bulk">GitHub</a>. El
 informe se regenera con
 <code>source(&quot;scripts/00_render_informe_entrega1.R&quot;)</code> a partir de
